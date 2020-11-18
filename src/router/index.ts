@@ -4,7 +4,9 @@ import Home from '../views/Home.vue'
 import Test from '../views/Test.vue'
 import Register from '../views/Register.vue'
 import Ventas from '../views/Ventas.vue'
+import Proveedores from '../views/Proveedores/Proveedores.vue';
 import Producto from '../views/Producto/Producto.vue'
+
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -31,6 +33,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/Ventas',
     name: 'Ventas',
     component: Ventas
+  },
+  {
+    path: '/Proveedores',
+    name: 'Proveedores',
+    component: Proveedores
   },
   {
     path: '/Producto',
