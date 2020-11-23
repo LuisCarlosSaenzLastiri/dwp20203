@@ -71,25 +71,17 @@
         <ion-card-title>Listado Proveedores</ion-card-title>
       </ion-card-header>
           <ion-list>
-              <ion-item-sliding>
+              <ion-item-sliding v-for="prov in proveedores" :key="prov">
                 <ion-item>
-                  <ion-label>Item</ion-label>
+                  <ion-label>{{ prov.rfc }} - {{ prov.razon}}</ion-label>
                 </ion-item>
                 <ion-item-options side="end">
-                  <ion-item-option @click="editItem(item)">Modificar</ion-item-option>
-                  <ion-item-option @click="deleteItem(item)">Borrar</ion-item-option>
+                  <ion-item-option @click="editItem(prov)">Modificar</ion-item-option>
+                  <ion-item-option @click="deleteItem(prov)">Borrar</ion-item-option>
                 </ion-item-options>
               </ion-item-sliding>
 
-              <ion-item-sliding>
-                <ion-item>
-                  <ion-label>Item</ion-label>
-                </ion-item>
-                <ion-item-options side="end">
-                  <ion-item-option @click="editItem(item)">Modificar</ion-item-option>
-                  <ion-item-option @click="deleteItem(item)">Borrar</ion-item-option>
-                </ion-item-options>
-              </ion-item-sliding>
+
             </ion-list>
       <ion-card-content>
         
@@ -126,6 +118,8 @@ import {
   IonButton,alertController,
   IonItem,IonCol, IonGrid, IonRow,IonList
 } from "@ionic/vue";
+import axios from 'axios';
+
 import { defineComponent } from "vue";
 
 export default defineComponent({
@@ -138,6 +132,7 @@ export default defineComponent({
         direccion : "",
         email : "",
         },
+      "proveedores":[],
     }
   },
   name: "Proveedores",
@@ -156,41 +151,89 @@ export default defineComponent({
     IonButton,
     IonItem,IonCol, IonGrid, IonRow,IonList
   },
+  async created(){
+    const res = await axios.get("http://localhost:3000/proveedores");
+console.log(res);
+    this.proveedores = res.data;
+    },
   methods:{
     async insert() {
             
-                const alert = await alertController
-                .create({
-                    header: 'Acceso concedido',
-                    message: "insertar",
-                    buttons: ['OK'],
-                });
-                return alert.present();    
+               if (this.proveedor.id == "" || this.proveedor.id == undefined){
+                //insertar dato nuevo
+                const res = await axios.post("http://localhost:3000/proveedores",this.proveedor);
+                console.log(res);
+                if (res.statusText == "Created"){
+                  this.proveedores.push(res.data);
+                  const alert = await alertController
+                  .create({
+                      header: 'Insertado correctamente',
+                      message: "Atencion",
+                      buttons: ['OK'],
+                  });
+                  return alert.present();
+                }else{
+                  const alert = await alertController
+                  .create({
+                      header: 'No se ha podido insertar el registro',
+                      message: "Atencion",
+                      buttons: ['OK'],
+                  });
+                  return alert.present();
+                }
+
+               }else{
+                const res = await axios.put("http://localhost:3000/proveedores/"+this.proveedor.id,this.proveedor);
+                console.log(res);
+                if (res.statusText == "OK"){
+
+                  this.proveedor ={
+                        razon : "",
+                        rfc :"",
+                        direccion : "",
+                        email : "",
+                        };
+
+                  const alert = await alertController
+                  .create({
+                      header: 'Modificado correctamente',
+                      message: "Atencion",
+                      buttons: ['OK'],
+                  });
+                  return alert.present();    
+
+                }
+                  
+               }
+                
             
             
         },
-        async editItem() {
-            
-                const alert = await alertController
-                .create({
-                    header: 'Acceso concedido',
-                    message: "edit",
-                    buttons: ['OK'],
-                });
-                return alert.present();    
-            
-            
+       editItem(prov) {
+            this.proveedor = prov;
         },
-      async deleteItem() {
-            
-                const alert = await alertController
-                .create({
-                    header: 'Acceso concedido',
-                    message: "delete",
-                    buttons: ['OK'],
-                });
-                return alert.present();    
-            
+      async deleteItem(prov) {
+                      
+          const confirm = await alertController.create({
+              header: 'Eliminar elemento',
+              message: 'Esta seguro que desea eliminar el elemento seleccionado...',
+              buttons: [
+                {
+                  text: 'Eliominar',
+                  handler: () => {
+                    const res = axios.delete("http://localhost:3000/proveedores/"+prov.id);
+                  console.log(res);
+                  }
+                },
+                {
+                  text: 'Cancelar',
+                  handler: () => {
+                    console.log('No hace nada');
+                  }
+                }
+              ]
+            });
+            confirm.present();
             
         },
     }
